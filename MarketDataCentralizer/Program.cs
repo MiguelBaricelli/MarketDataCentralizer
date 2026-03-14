@@ -9,6 +9,7 @@ using MarketDataCentralizer.Application.Services.Overview;
 using MarketDataCentralizer.Application.Services.Redis;
 using MarketDataCentralizer.Application.Services.Weekly;
 using MarketDataCentralizer.Domain.Models.ApiClientSecurity;
+using MarketDataCentralizer.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -105,7 +106,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Notification API",
+        Title = "Market Data Centralizer API",
         Version = "v1"
     });
 
