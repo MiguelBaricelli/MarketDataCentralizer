@@ -2,7 +2,6 @@
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Infrastructure.ExternalApis;
 using MarketDataCentralizer.Infrastructure.ExternalApis.Brapi;
-using MarketDataCentralizer.Infrastructure.ExternalApis.Email;
 using MarketDataCentralizer.Infrastructure.Redis;
 using MarketDataCentralizer.Infrastructure.Repository;
 using MarketDataCentralizer.Infrastructure.Repository.Redis;
@@ -22,7 +21,6 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
             services.AddScoped<IAlphaVantageWeeklyConsumer, AlphaVantageWeeklyConsumer>();
             services.AddScoped<IAlphaVantageOverviewConsumer, AlphaVantageOverviewConsumer>();
             services.AddScoped<IAlphaVantageGeneralConsumer, AlphaVantageGeneralConsumer>();
-            services.AddScoped<ISendGridIntegration, SendGridIntegration>();
             services.AddScoped<IBrApiIntegrationConsumer, BrApiIntegrationConsumer>();
             services.AddScoped<IBrApiRepository, BrApiRepository>();
 
