@@ -1,0 +1,6 @@
+@MarketDataCentralizer_HostAddress = http://localhost:5238
+
+GET {{MarketDataCentralizer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
