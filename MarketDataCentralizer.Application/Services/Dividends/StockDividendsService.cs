@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MarketDataCentralizer.Application.Services.Dividends
@@ -13,15 +14,20 @@ namespace MarketDataCentralizer.Application.Services.Dividends
     {
 
         private readonly IAlphaVantageRepository _alphaVantageRepository;
+        private readonly ICacheValidator _cacheValidator;
 
-        public StockDividendsService(IAlphaVantageRepository alphaVantageRepository)
+        public StockDividendsService(IAlphaVantageRepository alphaVantageRepository,
+            ICacheValidator cacheValidator)
         {
             _alphaVantageRepository = alphaVantageRepository;
+            _cacheValidator = cacheValidator;
         }
 
         public async Task<StockDividendResponse> GetDividendResponseAsync(string symbol)
         {
-            return await _alphaVantageRepository.GetDividendResponseAsync(symbol);
+            var isCached = await _cacheValidator.CacheValidatorAsync(symbol, () => _alphaVantageRepository.GetDividendResponseAsync(symbol));
+
+            return isCached;
         }
     }
 }
