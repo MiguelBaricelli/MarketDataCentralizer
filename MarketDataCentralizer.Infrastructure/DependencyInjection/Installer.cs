@@ -4,6 +4,7 @@ using MarketDataCentralizer.Infrastructure.ExternalApis;
 using MarketDataCentralizer.Infrastructure.ExternalApis.Brapi;
 using MarketDataCentralizer.Infrastructure.Redis;
 using MarketDataCentralizer.Infrastructure.Repository;
+using MarketDataCentralizer.Infrastructure.Repository.AlphaVantage;
 using MarketDataCentralizer.Infrastructure.Repository.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,8 +22,10 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
             services.AddScoped<IAlphaVantageWeeklyConsumer, AlphaVantageWeeklyConsumer>();
             services.AddScoped<IAlphaVantageOverviewConsumer, AlphaVantageOverviewConsumer>();
             services.AddScoped<IAlphaVantageGeneralConsumer, AlphaVantageGeneralConsumer>();
+            services.AddScoped<IAlphaVantageDividendsConsumer, AlphaVantageDividendsConsumer>();
             services.AddScoped<IBrApiIntegrationConsumer, BrApiIntegrationConsumer>();
             services.AddScoped<IBrApiRepository, BrApiRepository>();
+            services.AddScoped<IAlphaVantageRepository, AlphaVantageRepository>();
 
 
             // Redis
