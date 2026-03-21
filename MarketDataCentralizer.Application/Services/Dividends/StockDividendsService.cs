@@ -25,7 +25,8 @@ namespace MarketDataCentralizer.Application.Services.Dividends
 
         public async Task<StockDividendResponse> GetDividendResponseAsync(string symbol)
         {
-            var isCached = await _cacheValidator.CacheValidatorAsync(symbol, () => _alphaVantageRepository.GetDividendResponseAsync(symbol));
+            var cachePrefix = "dividends";
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, cachePrefix,() => _alphaVantageRepository.GetDividendResponseAsync(symbol));
 
             return isCached;
         }
