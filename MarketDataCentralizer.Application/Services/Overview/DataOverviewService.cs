@@ -11,15 +11,34 @@ namespace MarketDataCentralizer.Application.Services.Overview
 
         private readonly IAlphaVantageOverviewConsumer _alphaVantageOverviewConsumer;
         private readonly ICacheRepository _cacheRepository;
+        private readonly ICacheValidator _cacheValidator;
 
 
-        public DataOverviewService(IAlphaVantageOverviewConsumer alphaVantageOverviewConsumer, ICacheRepository cacheRepository)
+        public DataOverviewService(IAlphaVantageOverviewConsumer alphaVantageOverviewConsumer, ICacheRepository cacheRepository, ICacheValidator cacheValidator)
         {
             _alphaVantageOverviewConsumer = alphaVantageOverviewConsumer;
             _cacheRepository = cacheRepository;
+            _cacheValidator = cacheValidator;
         }
 
         public async Task<OverviewModel> GetAllDataOverviewBySymbolServiceAsync(string symbol)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentNullException("Ativo obrigatorio");
+            }
+
+            var IsCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, "overview", () => _alphaVantageOverviewConsumer.OverviewConsumer(symbol)).ConfigureAwait(false);
+             
+            if (IsCache == null)
+            {
+                throw new Exception("Nenhum dado encontrado para o ativo informado.");
+            }
+
+            return IsCache;
+        }
+
+        public async Task<SummaryCompanyOverviewDto> GetCompanyOverviewSummaryServiceAsync(string symbol)
         {
             if (string.IsNullOrWhiteSpace(symbol))
             {
@@ -30,28 +49,7 @@ namespace MarketDataCentralizer.Application.Services.Overview
 
             if (!string.IsNullOrWhiteSpace(IsCache))
             {
-                return JsonSerializer.Deserialize<OverviewModel>(IsCache);
-            }
-
-            var data = await _alphaVantageOverviewConsumer.OverviewConsumer(symbol);
-
-            if (data == null)
-            {
-                throw new Exception("Nenhum dado encontrado para o ativo informado.");
-            }
-
-            var json = JsonSerializer.Serialize(data);
-
-            await _cacheRepository.SetAsync(symbol, json, TimeSpan.FromSeconds(120));
-
-            return data;
-        }
-
-        public async Task<SummaryCompanyOverviewDto> GetCompanyOverviewSummaryServiceAsync(string symbol)
-        {
-            if (string.IsNullOrWhiteSpace(symbol))
-            {
-                throw new ArgumentNullException("Ativo obrigatorio");
+                return JsonSerializer.Deserialize<SummaryCompanyOverviewDto>(IsCache);
             }
 
             var data = await _alphaVantageOverviewConsumer.OverviewConsumer(symbol);

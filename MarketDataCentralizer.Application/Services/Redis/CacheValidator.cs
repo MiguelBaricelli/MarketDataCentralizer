@@ -32,5 +32,29 @@ namespace MarketDataCentralizer.Application.Services.Redis
 
             return response;
         }
+
+        public async Task<T> CacheValidatorWithPrefixAsync<T>(string symbol, string prefixKey, Func<Task<T>> fetchData) where T : class
+        {
+            if (string.IsNullOrEmpty(symbol))
+                return default;
+
+            var isCached = await _cacheRepository.GetAsync(symbol);
+            if (!string.IsNullOrWhiteSpace(isCached))
+                return JsonSerializer.Deserialize<T>(isCached);
+
+            // Cache miss — executa a função passada
+            var response = await fetchData();
+            if (response == null)
+                return default;
+
+            string cachePrefix = prefixKey + "-" + symbol;
+
+            var json = JsonSerializer.Serialize(response);
+            await _cacheRepository.SetAsync(cachePrefix, json, TimeSpan.FromSeconds(120));
+
+            return response;
+        }
+
+       
     }
 }
