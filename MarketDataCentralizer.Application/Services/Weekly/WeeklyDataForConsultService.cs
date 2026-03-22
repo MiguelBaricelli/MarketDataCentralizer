@@ -9,10 +9,12 @@ namespace MarketDataCentralizer.Application.Services.Weekly
     {
 
         private readonly IAlphaVantageWeeklyConsumer _consumer;
+        private readonly ICacheValidator _cacheValidator;
 
-        public WeeklyDataForConsultService(IAlphaVantageWeeklyConsumer consumer)
+        public WeeklyDataForConsultService(IAlphaVantageWeeklyConsumer consumer, ICacheValidator cacheValidator)
         {
             _consumer = consumer;
+            _cacheValidator = cacheValidator;
         }
 
         // Pega os dados semanais completos
@@ -23,14 +25,15 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             {
                 throw new ArgumentNullException("Precisa conter o simbolo");
             }
-            var request = await _consumer.TimeSeriesWeeklyConsumer(symbol);
+            var prefixKey = "weeklyData";
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
-            if (request == null)
+            if (isCached == null)
             {
-                throw new ArgumentNullException("Objeto não encontrado");
+                return null;
             }
 
-            return request;
+            return isCached;
         }
 
         // Pega os dados semanais por data específica
@@ -39,14 +42,15 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentNullException(nameof(symbol), "Precisa conter o símbolo");
 
-            var request = await _consumer.TimeSeriesWeeklyConsumer(symbol);
+            var prefixKey = "weeklyData";
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
-            if (request == null)
-                throw new Exception("Não foi possível acessar os dados");
+            if (isCached == null)
+                return null;
 
             string dateKey = date.ToString("yyyy-MM-dd");
 
-            if (!request.WeeklyTimeSeries.TryGetValue(dateKey, out var weeklyData))
+            if (!isCached.WeeklyTimeSeries.TryGetValue(dateKey, out var weeklyData))
                 throw new Exception($"Nenhum dado foi encontrado para data {dateKey}");
 
             // Retorna apenas a semana solicitada dentro de um novo objeto
@@ -62,12 +66,18 @@ namespace MarketDataCentralizer.Application.Services.Weekly
         // Pega os dados semanais dos últimos 10 períodos (semanas)
         public async Task<WeeklyTimeSeriesModel> GetLastTenWeeklys(string symbol)
         {
-            var request = await _consumer.TimeSeriesWeeklyConsumer(symbol);
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                return null;
+            }
 
-            if (request == null)
-                throw new Exception("Não foi possível acessar os dados");
+            var prefixKey = "weeklyData";
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
-            var result = request.WeeklyTimeSeries
+            if (isCached == null)
+                return null;
+
+            var result = isCached.WeeklyTimeSeries
             .OrderByDescending(x => x.Key) // mais recente primeiro
             .Take(10)
             .ToDictionary(x => x.Key, x => x.Value);

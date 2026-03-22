@@ -71,6 +71,20 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
 
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"JWT falhou: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("JWT válido");
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 
@@ -136,17 +150,16 @@ builder.Services.AddSwaggerGen(c =>
 // ================= BUILD =================
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
 // ================= PIPELINE =================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 

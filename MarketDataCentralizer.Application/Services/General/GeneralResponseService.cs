@@ -9,9 +9,11 @@ namespace MarketDataCentralizer.Application.Services.General
     public class GeneralResponseService : IGeneralResponseService
     {
         private readonly IAlphaVantageGeneralConsumer _alphaVantageGeneralConsumer;
-        public GeneralResponseService(IAlphaVantageGeneralConsumer alphaVantageGeneralConsumer)
+        private readonly ICacheValidator _cacheValidator;
+        public GeneralResponseService(IAlphaVantageGeneralConsumer alphaVantageGeneralConsumer, ICacheValidator cacheValidator)
         {
             _alphaVantageGeneralConsumer = alphaVantageGeneralConsumer;
+            _cacheValidator = cacheValidator;
         }
 
         /// <summary>
@@ -22,21 +24,23 @@ namespace MarketDataCentralizer.Application.Services.General
         /// </summary>
         public async Task<GeneralResponseModel> GeneralResponseServiceAsync(string symbol, DateTime date, FunctionAlphaVantageEnum vantageEnum)
         {
-            var response = await _alphaVantageGeneralConsumer.TimeSeriesGeneralConsumer(symbol, vantageEnum);
-
+            var prefixKey = $"generalResponse:{symbol}:{vantageEnum}";
+            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, 
+                () => _alphaVantageGeneralConsumer.TimeSeriesGeneralConsumer(symbol, vantageEnum)).ConfigureAwait(false);
+     
             // Escolhe a série conforme o enum solicitado; se não existir, faz fallback para a primeira série disponível
             Dictionary<string, AlphaVantageDailyDto>? sourceSeries = vantageEnum switch
             {
-                FunctionAlphaVantageEnum.TIME_SERIES_DAILY => response.TimeSeriesDaily,
-                FunctionAlphaVantageEnum.TIME_SERIES_WEEKLY => response.WeeklyTimeSeries,
-                FunctionAlphaVantageEnum.TIME_SERIES_MONTHLY => response.TimeSeriesMonthly,
+                FunctionAlphaVantageEnum.TIME_SERIES_DAILY => isCache.TimeSeriesDaily,
+                FunctionAlphaVantageEnum.TIME_SERIES_WEEKLY => isCache.WeeklyTimeSeries,
+                FunctionAlphaVantageEnum.TIME_SERIES_MONTHLY => isCache.TimeSeriesMonthly,
                 _ => null
             };
 
             if (sourceSeries == null || sourceSeries.Count == 0)
             {
                 // fallback: primeira série não-nula encontrada
-                sourceSeries = response.TimeSeriesDaily ?? response.WeeklyTimeSeries ?? response.TimeSeriesMonthly;
+                sourceSeries = isCache.TimeSeriesDaily ?? isCache.WeeklyTimeSeries ?? isCache.TimeSeriesMonthly;
             }
 
             if (sourceSeries == null || sourceSeries.Count == 0)
