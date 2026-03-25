@@ -5,11 +5,17 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer", "MarketDataCentralizer\MarketDataCentralizer.csproj", "{DE0A2116-FA8A-4385-AAA0-8BA8B4211558}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataCentralizer.Application", "MarketDataCentralizer.Application\MarketDataCentralizer.Application.csproj", "{F39B95B7-FE13-40C2-B156-B84419E0B3F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Application", "MarketDataCentralizer.Application\MarketDataCentralizer.Application.csproj", "{F39B95B7-FE13-40C2-B156-B84419E0B3F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataCentralizer.Domain", "MarketDataCentralizer.Domain\MarketDataCentralizer.Domain.csproj", "{F26F60B3-129D-48C1-9B67-B3609F7D6BD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Domain", "MarketDataCentralizer.Domain\MarketDataCentralizer.Domain.csproj", "{F26F60B3-129D-48C1-9B67-B3609F7D6BD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataCentralizer.Infrastructure", "MarketDataCentralizer.Infrastructure\MarketDataCentralizer.Infrastructure.csproj", "{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Infrastructure", "MarketDataCentralizer.Infrastructure\MarketDataCentralizer.Infrastructure.csproj", "{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{358CE0A0-B3E9-4259-9E2C-ACF18E89E928}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{595BAF3E-B8C6-4020-9444-AE587C5FC3BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataCentralizer.Tests", "MarketDataCentralizer.Tests\MarketDataCentralizer.Tests.csproj", "{121E8F6D-460E-4FEB-985B-364BCB30DAEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +39,22 @@ Global
 		{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{121E8F6D-460E-4FEB-985B-364BCB30DAEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{121E8F6D-460E-4FEB-985B-364BCB30DAEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{121E8F6D-460E-4FEB-985B-364BCB30DAEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{121E8F6D-460E-4FEB-985B-364BCB30DAEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE0A2116-FA8A-4385-AAA0-8BA8B4211558} = {358CE0A0-B3E9-4259-9E2C-ACF18E89E928}
+		{F39B95B7-FE13-40C2-B156-B84419E0B3F0} = {358CE0A0-B3E9-4259-9E2C-ACF18E89E928}
+		{F26F60B3-129D-48C1-9B67-B3609F7D6BD2} = {358CE0A0-B3E9-4259-9E2C-ACF18E89E928}
+		{D962809F-B5F6-49D3-BD53-CBB24DE3FFA1} = {358CE0A0-B3E9-4259-9E2C-ACF18E89E928}
+		{121E8F6D-460E-4FEB-985B-364BCB30DAEF} = {595BAF3E-B8C6-4020-9444-AE587C5FC3BE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {011D959B-EC09-4BD3-B737-AE3F24C107B5}
 	EndGlobalSection
 EndGlobal

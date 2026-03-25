@@ -28,7 +28,7 @@ namespace MarketDataCentralizer.Controllers.V1.Dividends
                 {
                     return BadRequest("Passe o símbolo corretamente");
                 }
-                var response = _stockDividendsService.GetDividendResponseAsync(symbol).Result;
+                var response = await _stockDividendsService.GetDividendResponseAsync(symbol);
                 if(response == null)
                 {
                    return NotFound("Nenhum dado foi encontrados");
