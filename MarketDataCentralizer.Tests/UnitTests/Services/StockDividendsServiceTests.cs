@@ -4,7 +4,7 @@ using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models;
 using Moq;
 
-namespace MarketDataCentralizer.Tests.Services
+namespace MarketDataCentralizer.Tests.UnitTests.Services
 {
     public class StockDividendsServiceTests
     {
@@ -25,7 +25,7 @@ namespace MarketDataCentralizer.Tests.Services
             var mockRepo = new Mock<IAlphaVantageRepository>();
             var mockCacheValidator = new Mock<ICacheValidator>();
 
-            mockCacheValidator.Setup(c => c.CacheValidatorWithPrefixAsync<StockDividendResponse>(
+            mockCacheValidator.Setup(c => c.CacheValidatorWithPrefixAsync(
                 symbol,
                 "dividends",
                 It.IsAny<Func<Task<StockDividendResponse>>>()))
