@@ -18,12 +18,15 @@ namespace MarketDataCentralizer.Infrastructure.Repository.AlphaVantage
         private readonly IAlphaVantageWeeklyConsumer _alphaVantageWeeklyConsumer;
         private readonly IAlphaVantageGeneralConsumer _alphaVantageGeneralConsumer;
         private readonly IAlphaVantageDividendsConsumer _alphaVantageDividendsConsumer;
+        private readonly IGlobalMarketSituationConsumer _globalMarketSituationConsumer;
 
         public AlphaVantageRepository(IAlphaVantageDailyConsumer alphaVantageDailyConsumer,
             IAlphaVantageOverviewConsumer alphaVantageOverviewConsumer,
             IAlphaVantageWeeklyConsumer alphaVantageWeeklyConsumer,
             IAlphaVantageGeneralConsumer alphaVantageGeneralConsumer,
-            IAlphaVantageDividendsConsumer alphaVantageDividendsConsumer
+            IAlphaVantageDividendsConsumer alphaVantageDividendsConsumer,
+            IGlobalMarketSituationConsumer globalMarketSituationConsumer
+
             )
         {
             _alphaVantageDailyConsumer = alphaVantageDailyConsumer;
@@ -31,6 +34,7 @@ namespace MarketDataCentralizer.Infrastructure.Repository.AlphaVantage
             _alphaVantageWeeklyConsumer = alphaVantageWeeklyConsumer;
             _alphaVantageGeneralConsumer = alphaVantageGeneralConsumer;
             _alphaVantageDividendsConsumer = alphaVantageDividendsConsumer;
+            _globalMarketSituationConsumer = globalMarketSituationConsumer;
         }
 
         public async Task<DailyTimeSeriesModel> GetAlphaVantageDailyDataAsync(string symbol)
@@ -55,6 +59,11 @@ namespace MarketDataCentralizer.Infrastructure.Repository.AlphaVantage
         public async Task<StockDividendResponse> GetDividendResponseAsync(string symbol)
         {
             return await _alphaVantageDividendsConsumer.DividendsConsumer(symbol);
+        }
+
+        public async Task<MarketSituationResponse> GetMarketSituationAsync()
+        {
+            return await _globalMarketSituationConsumer.GetMarketSituationIntegration();
         }
     }
 }

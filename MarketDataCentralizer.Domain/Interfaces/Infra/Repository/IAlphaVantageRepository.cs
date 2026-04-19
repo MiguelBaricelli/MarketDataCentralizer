@@ -15,5 +15,6 @@ namespace MarketDataCentralizer.Domain.Interfaces.Infra.Repository
         Task<WeeklyTimeSeriesModel> GetAlphaVantageWeeklyDataAsync(string symbol);
         Task<GeneralResponseModel> GetAlphaVantageGeneralDataAsync(string symbol, FunctionAlphaVantageEnum functionAlphaVantageEnum);
         Task<StockDividendResponse> GetDividendResponseAsync(string symbol);
+        Task<MarketSituationResponse> GetMarketSituationAsync();
     }
 }
