@@ -26,6 +26,7 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
             services.AddScoped<IBrApiIntegrationConsumer, BrApiIntegrationConsumer>();
             services.AddScoped<IBrApiRepository, BrApiRepository>();
             services.AddScoped<IAlphaVantageRepository, AlphaVantageRepository>();
+            services.AddScoped<IGlobalMarketSituationConsumer, GlobalMarketSituationConsumer>();
 
 
             // Redis

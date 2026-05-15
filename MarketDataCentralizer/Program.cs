@@ -4,6 +4,7 @@ using MarketDataCentralizer.Application.Services.Daily;
 using MarketDataCentralizer.Application.Services.DataMarketBrazil;
 using MarketDataCentralizer.Application.Services.Dividends;
 using MarketDataCentralizer.Application.Services.General;
+using MarketDataCentralizer.Application.Services.MarketSituation;
 using MarketDataCentralizer.Application.Services.Overview;
 using MarketDataCentralizer.Application.Services.Redis;
 using MarketDataCentralizer.Application.Services.Weekly;
@@ -99,6 +100,7 @@ builder.Services.AddScoped<IDataMarketBrazilService, DataMarketBrazilService>();
 builder.Services.AddScoped<RedisTestService>();
 builder.Services.AddScoped<ICacheValidator, CacheValidator>();
 builder.Services.AddScoped<IStockDividendsService, StockDividendsService>();
+builder.Services.AddScoped<MarketSituationService>();
 
 // ================= INFRASTRUCTURE =================
 builder.Services.AddHttpClient();
