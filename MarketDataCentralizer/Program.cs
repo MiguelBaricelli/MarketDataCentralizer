@@ -169,7 +169,7 @@ builder.Services.AddScoped<MarketSituationService>();
 
 // ================= INFRASTRUCTURE =================
 builder.Services.AddHttpClient();
-builder.Services.AddDependencyInjection(builder.Configuration);
+builder.Services.AddDependencyInjection(builder.Configuration, bootstrapLogger);
 
 // ================= CONTROLLERS =================
 builder.Services.AddControllers()
