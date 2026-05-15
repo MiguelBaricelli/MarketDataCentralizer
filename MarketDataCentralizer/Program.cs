@@ -18,39 +18,81 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================= USER SECRETS =================
-builder.Configuration.AddUserSecrets<Program>();
+// ================= LOGGING =================
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
-
-/*
-var apiKey = builder.Configuration["ApiKeys:KeyApiFinance"];
-
-if (string.IsNullOrEmpty(apiKey))
+// Logger de bootstrap (antes do DI estar pronto)
+using var loggerFactory = LoggerFactory.Create(logging =>
 {
-    Console.WriteLine("Chave da api não encontrada no User Secrets");
-    throw new ArgumentException("Chave da api não encontrada no User Secrets");
-}
-*/
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Debug);
+});
+var bootstrapLogger = loggerFactory.CreateLogger("Startup");
 
+bootstrapLogger.LogInformation("Iniciando configuração da aplicação...");
+
+// ================= USER SECRETS =================
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+    bootstrapLogger.LogDebug("User Secrets carregados (ambiente de desenvolvimento).");
+}
 
 // ================= API KEY (Alpha Vantage) =================
 var alphaVantageApiKey = builder.Configuration["ApiKeys:AlphaVantage"];
 
 if (string.IsNullOrEmpty(alphaVantageApiKey))
 {
-    Console.WriteLine("Chave da API Alpha Vantage não encontrada");
-    throw new ArgumentException("Chave da API Alpha Vantage não encontrada");
+    bootstrapLogger.LogCritical(
+        "Chave da API Alpha Vantage não encontrada. " +
+        "Verifique se 'ApiKeys:AlphaVantage' está configurado em User Secrets ou variáveis de ambiente.");
+    throw new InvalidOperationException("Chave da API Alpha Vantage não configurada.");
 }
 
+bootstrapLogger.LogInformation("Chave da API Alpha Vantage carregada com sucesso.");
+
 // ================= JWT SETTINGS =================
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("Auth:Jwt")
-);
+var jwtSection = builder.Configuration.GetSection("Auth:Jwt");
 
-var jwt = builder.Configuration.GetSection("Auth:Jwt");
+if (!jwtSection.Exists())
+{
+    bootstrapLogger.LogCritical(
+        "Seção de configuração 'Auth:Jwt' não encontrada. " +
+        "Verifique appsettings.json ou User Secrets.");
+    throw new InvalidOperationException("Configuração JWT ausente: seção 'Auth:Jwt' não encontrada.");
+}
 
-if (string.IsNullOrWhiteSpace(jwt["SecretKey"]))
-    throw new Exception("JWT SecretKey não configurada");
+builder.Services.Configure<JwtSettings>(jwtSection);
+
+var jwtSecretKey = jwtSection["SecretKey"];
+var jwtIssuer = jwtSection["Issuer"];
+var jwtAudience = jwtSection["Audience"];
+
+var jwtErrors = new List<string>();
+
+if (string.IsNullOrWhiteSpace(jwtSecretKey))
+    jwtErrors.Add("'Auth:Jwt:SecretKey' está ausente ou vazia");
+
+if (string.IsNullOrWhiteSpace(jwtIssuer))
+    jwtErrors.Add("'Auth:Jwt:Issuer' está ausente ou vazia");
+
+if (string.IsNullOrWhiteSpace(jwtAudience))
+    jwtErrors.Add("'Auth:Jwt:Audience' está ausente ou vazia");
+
+if (jwtErrors.Count > 0)
+{
+    foreach (var error in jwtErrors)
+        bootstrapLogger.LogCritical("Configuração JWT inválida: {Error}", error);
+
+    throw new InvalidOperationException(
+        $"Configuração JWT incompleta. Problemas encontrados: {string.Join("; ", jwtErrors)}");
+}
+
+bootstrapLogger.LogInformation("Configurações JWT validadas com sucesso (Issuer: {Issuer}, Audience: {Audience}).",
+    jwtIssuer, jwtAudience);
 
 // ================= AUTHENTICATION =================
 builder.Services
@@ -63,12 +105,9 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
-            ValidIssuer = jwt["Issuer"],
-            ValidAudience = jwt["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwt["SecretKey"]!)
-            ),
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey!)),
             ClockSkew = TimeSpan.Zero
         };
 
@@ -76,18 +115,44 @@ builder.Services
         {
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine($"JWT falhou: {context.Exception.Message}");
+                // Usa o logger injetado pelo pipeline, não o bootstrapLogger
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+
+                logger.LogWarning(
+                    context.Exception,
+                    "Falha na autenticação JWT. Path: {Path} | Erro: {Message}",
+                    context.HttpContext.Request.Path,
+                    context.Exception.Message);
+
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
             {
-                Console.WriteLine("JWT válido");
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+
+                var user = context.Principal?.Identity?.Name ?? "desconhecido";
+                logger.LogDebug("JWT validado com sucesso para o usuário: {User}", user);
+
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+
+                logger.LogWarning(
+                    "Acesso negado (401). Path: {Path} | Motivo: {ErrorDescription}",
+                    context.HttpContext.Request.Path,
+                    context.ErrorDescription ?? "Token ausente ou inválido");
+
                 return Task.CompletedTask;
             }
         };
-
     });
 
+bootstrapLogger.LogInformation("Autenticação JWT configurada.");
 
 // ================= APPLICATION SERVICES =================
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -109,8 +174,7 @@ builder.Services.AddDependencyInjection(builder.Configuration);
 // ================= CONTROLLERS =================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
-);
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -141,7 +205,7 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Id   = "Bearer"
                 }
             },
             Array.Empty<string>()
@@ -151,6 +215,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // ================= BUILD =================
 var app = builder.Build();
+var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+appLogger.LogInformation("Aplicação construída com sucesso. Ambiente: {Environment}",
+    app.Environment.EnvironmentName);
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -161,8 +228,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    appLogger.LogInformation("Swagger habilitado (ambiente de desenvolvimento).");
 }
 
 app.MapControllers();
 
+appLogger.LogInformation("Aplicação iniciada e pronta para receber requisições.");
 app.Run();
