@@ -12,7 +12,7 @@ COPY MarketDataCentralizer.Domain/MarketDataCentralizer.Domain.csproj MarketData
 COPY MarketDataCentralizer.Infrastructure/MarketDataCentralizer.Infrastructure.csproj MarketDataCentralizer.Infrastructure/
 
 # Restore
-RUN dotnet restore MarketDataCentralizer.sln
+RUN dotnet restore MarketDataCentralizer/MarketDataCentralizer.csproj
 
 # Copia restante do código
 COPY . .
