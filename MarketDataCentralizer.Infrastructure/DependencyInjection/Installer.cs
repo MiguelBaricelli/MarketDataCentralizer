@@ -8,6 +8,7 @@ using MarketDataCentralizer.Infrastructure.Repository.AlphaVantage;
 using MarketDataCentralizer.Infrastructure.Repository.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace MarketDataCentralizer.Infrastructure.DependencyInjection
 {
@@ -15,31 +16,54 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
     {
 
         public static IServiceCollection AddDependencyInjection(
-        this IServiceCollection services, IConfiguration configuration)
+        this IServiceCollection services,
+        IConfiguration configuration,
+        ILogger? logger = null)
         {
-            // Outros serviços
+            // ================= CONSUMERS =================
             services.AddScoped<IAlphaVantageDailyConsumer, AlphaVantageDailyConsumer>();
             services.AddScoped<IAlphaVantageWeeklyConsumer, AlphaVantageWeeklyConsumer>();
             services.AddScoped<IAlphaVantageOverviewConsumer, AlphaVantageOverviewConsumer>();
             services.AddScoped<IAlphaVantageGeneralConsumer, AlphaVantageGeneralConsumer>();
             services.AddScoped<IAlphaVantageDividendsConsumer, AlphaVantageDividendsConsumer>();
             services.AddScoped<IBrApiIntegrationConsumer, BrApiIntegrationConsumer>();
-            services.AddScoped<IBrApiRepository, BrApiRepository>();
-            services.AddScoped<IAlphaVantageRepository, AlphaVantageRepository>();
             services.AddScoped<IGlobalMarketSituationConsumer, GlobalMarketSituationConsumer>();
 
+            logger?.LogDebug("Consumers registrados.");
 
-            // Redis
+            // ================= REPOSITORIES =================
+            services.AddScoped<IBrApiRepository, BrApiRepository>();
+            services.AddScoped<IAlphaVantageRepository, AlphaVantageRepository>();
+
+            logger?.LogDebug("Repositories registrados.");
+
+            // ================= REDIS =================
             var connectionString = configuration.GetConnectionString("RedisConnection");
+
             if (string.IsNullOrEmpty(connectionString))
-                throw new Exception("String de conexão com Redis não encontrada");
+            {
+                logger?.LogCritical(
+                    "String de conexão com Redis não encontrada. " +
+                    "Verifique 'ConnectionStrings:RedisConnection' no appsettings ou variáveis de ambiente.");
 
-            // Singleton: one shared connection across the app lifetime
-            services.AddSingleton<IRedisIntegration>(sp =>
-                new RedisIntegration(connectionString));
+                throw new InvalidOperationException("String de conexão com Redis não configurada.");
+            }
 
-            // RedisRepository now resolves IRedisIntegration cleanly — no string needed
-            services.AddScoped<ICacheRepository, RedisRepository>();
+            try
+            {
+                services.AddSingleton<IRedisIntegration>(sp =>
+                    new RedisIntegration(connectionString));
+
+                services.AddScoped<ICacheRepository, RedisRepository>();
+
+                logger?.LogInformation("Redis configurado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                logger?.LogCritical(ex,
+                    "Falha ao registrar RedisIntegration. ConnectionString presente mas inválida.");
+                throw;
+            }
 
             return services;
         }
