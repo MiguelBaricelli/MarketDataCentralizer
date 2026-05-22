@@ -27,7 +27,7 @@ namespace MarketDataCentralizer.Controllers.V1.Weekly
         /// <param name="ativo">Símbolo do ativo (ex.: MSFT, AAPL, IBM)</param>
         /// <returns>Lista FinanceDataModel com os dados das últimas 10 semanas</returns>
         [Authorize]
-        [HttpGet("Last10Days/{ativo}")]
+        [HttpGet("EUA/Last10Days/{ativo}")]
         [ProducesResponseType(typeof(IEnumerable<FinanceDataModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -62,7 +62,7 @@ namespace MarketDataCentralizer.Controllers.V1.Weekly
         /// <param name="ativo">Símbolo do ativo (ex.: MSFT, AAPL, IBM)</param>
         /// <param name="date">Data da semana desejada (formato yyyy-MM-dd)</param>
         /// <returns>Objeto FinanceDataModel com os dados da semana solicitada</returns>
-        [HttpGet("DataSpecificFridayWeekly/{ativo}/{date}")]
+        [HttpGet("EUA/DataSpecificFridayWeekly/{ativo}/{date}")]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

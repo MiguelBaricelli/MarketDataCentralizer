@@ -32,7 +32,7 @@ namespace MarketDataCentralizer.Application.Services.Overview
             }
 
             var IsCache = await _cacheValidator.
-                CacheValidatorWithPrefixAndTimeAsync(symbol, 
+                CacheValidatorWithSymbolAndTimeAsync(symbol, 
                 OverViewPrefixKey, 
                 () => _alphaVantageOverviewConsumer.OverviewConsumer(symbol), 
                 DayInSeconds).ConfigureAwait(false);

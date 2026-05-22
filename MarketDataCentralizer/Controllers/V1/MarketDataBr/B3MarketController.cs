@@ -16,7 +16,7 @@ namespace MarketDataCentralizer.Controllers.V1.MarketDataBr
         }
 
         //[Authorize]
-        [HttpGet("GetMarketDataBr/{symbol}")]
+        [HttpGet("BR/MarketData/{symbol}")]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status404NotFound)]
@@ -43,7 +43,7 @@ namespace MarketDataCentralizer.Controllers.V1.MarketDataBr
         }
 
         //[Authorize]
-        [HttpGet("GetListAssetsInfo/{symbol}")]
+        [HttpGet("BR/ListAssetsInfo/{symbol}")]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status404NotFound)]
@@ -70,7 +70,7 @@ namespace MarketDataCentralizer.Controllers.V1.MarketDataBr
         }
 
         //[Authorize]
-        [HttpGet("GetRegularData/{symbol}")]
+        [HttpGet("BR/RegularData/{symbol}")]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(BrApiRequest), StatusCodes.Status404NotFound)]

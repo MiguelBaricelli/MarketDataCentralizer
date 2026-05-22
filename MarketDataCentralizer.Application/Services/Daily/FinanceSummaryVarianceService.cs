@@ -27,7 +27,7 @@ namespace MarketDataCentralizer.Application.Services.Daily
                 throw new ArgumentNullException("Ativo é obrigatorio");
             }
 
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAndTimeAsync(ativo, FinanceSummaryVariancePrefixKey, () => _client.TimeSeriesDailyConsumer(ativo), DayInSeconds).ConfigureAwait(false);
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAndTimeAsync(ativo, FinanceSummaryVariancePrefixKey, () => _client.TimeSeriesDailyConsumer(ativo), DayInSeconds).ConfigureAwait(false);
             
 
             string dateKey = date.ToString("yyyy-MM-dd");

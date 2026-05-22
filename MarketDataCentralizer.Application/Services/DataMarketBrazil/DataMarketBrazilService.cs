@@ -20,14 +20,14 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
 
         public async Task<BrApiRequest> GetAllBrApiDataAsync(string symbol)
         {
-            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey,() => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, DataMarketBrPrefixKey,() => _brApiRepository.GetBrApiDataAsync(symbol));
 
             return response;
         }
 
         public async Task<List<BrApiModel>> GetListAssetsInfoAsync(string symbol)
         {
-            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
 
             return response.BraApiResults;
         }
@@ -36,7 +36,7 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
         public async Task<List<BrApiRegularModel>> GetRegularDataAsset(string symbol)
         {
 
-            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
 
             var listMessage = new List<BrApiRegularModel>();
 
@@ -71,7 +71,7 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
         public async Task<List<BrApiRegularModel>> GetRegularDataAssetTEST(string symbol)
         {
 
-            var response = await _cacheValidator.CacheValidatorAsync(symbol, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, DataMarketBrPrefixKey,() => _brApiRepository.GetBrApiDataAsync(symbol));
 
             var resultList = response.BraApiResults
                 .Select(result => new BrApiRegularModel
@@ -96,29 +96,6 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
                 .ToList();
 
             return resultList;
-        }
-
-        public async Task<BrApiRequest> GetRequestBrApiAsync(string symbol)
-        {
-            {
-                if (string.IsNullOrWhiteSpace(symbol))
-                {
-                    return new BrApiRequest
-                    {
-                        BraApiResults = new List<BrApiModel>(),
-                        RequestedAt = DateTime.UtcNow
-                    };
-                }
-
-                var response = await _brApiRepository.GetBrApiDataAsync(symbol);
-
-                if (response == null)
-                {
-                    throw new Exception("Nenhum dado encontrado");
-                }
-
-                return response;
-            }
         }
     }
 }

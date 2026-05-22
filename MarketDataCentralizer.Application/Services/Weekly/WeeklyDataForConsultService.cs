@@ -26,7 +26,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             {
                 throw new ArgumentNullException("Precisa conter o simbolo");
             }
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
             {
@@ -42,7 +42,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentNullException(nameof(symbol), "Precisa conter o símbolo");
 
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
                 return null;
@@ -70,7 +70,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
                 return null;
             }
 
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
                 return null;

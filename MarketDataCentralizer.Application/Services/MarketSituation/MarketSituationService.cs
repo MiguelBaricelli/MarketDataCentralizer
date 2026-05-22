@@ -30,7 +30,7 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
 
         public async Task<MarketSituationResponse> GetMarketSituationAsync()
         {
-            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
+            var cache = await _cacheValidator.CacheValidatorWithTimeAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
             return cache;
         }
 
@@ -40,7 +40,7 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
             {
                 return null;
             }
-            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () =>  _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
+            var cache = await _cacheValidator.CacheValidatorWithTimeAsync(MarketSituationPrefixKey, () =>  _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
 
             if(cache == null || cache.Markets == null)
             {
@@ -57,7 +57,7 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
         {
             var now = DateTime.Now.TimeOfDay;
 
-            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
+            var cache = await _cacheValidator.CacheValidatorWithTimeAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
 
             var mercadosAbertos = cache.Markets
             .Where(x =>
