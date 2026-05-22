@@ -1,5 +1,7 @@
-﻿using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
+﻿using MarketDataCentralizer.Application.Interfaces;
+using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,27 +13,41 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
     public class MarketSituationService
     {
         private readonly IAlphaVantageRepository _alphaVantageRepository;
+        private readonly ICacheValidator _cacheValidator;
+        private readonly ILogger<MarketSituationService> _logger;
 
-        public MarketSituationService(IAlphaVantageRepository alphaVantageRepository)
+        private const string MarketSituationPrefixKey = "MarketSituation";
+        private const int dayInSeconds = 24 * 60 * 60; 
+
+        public MarketSituationService(IAlphaVantageRepository alphaVantageRepository, 
+            ICacheValidator cacheValidator,
+            ILogger<MarketSituationService> logger)
         {
             _alphaVantageRepository = alphaVantageRepository;
+            _cacheValidator = cacheValidator;
+            _logger = logger;
         }
 
         public async Task<MarketSituationResponse> GetMarketSituationAsync()
         {
-            return await _alphaVantageRepository.GetMarketSituationAsync();
+            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
+            return cache;
         }
 
         public async Task<List<MarketSituationInfo>> GetMarketSituationFiltredByCountryAsync(string region)
         {
-            var result = await _alphaVantageRepository.GetMarketSituationAsync();
+            if (string.IsNullOrWhiteSpace(region))
+            {
+                return null;
+            }
+            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () =>  _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
 
-            if(result == null || result.Markets == null || !result.Markets.Any())
+            if(cache == null || cache.Markets == null)
             {
                 return new List<MarketSituationInfo>();
             }
 
-            var filter = result.Markets.Where(x => x.Region == region).ToList();
+            var filter = cache.Markets.Where(x => x.Region == region).ToList();
 
             return filter;
 
@@ -41,14 +57,9 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
         {
             var now = DateTime.Now.TimeOfDay;
 
-            var result = await _alphaVantageRepository.GetMarketSituationAsync();
+            var cache = await _cacheValidator.CacheValidatorOnlyPrefixAsync(MarketSituationPrefixKey, () => _alphaVantageRepository.GetMarketSituationAsync(), dayInSeconds);
 
-            if (result == null || result.Markets == null || !result.Markets.Any())
-            {
-                return new List<MarketSituationInfo>();
-            }
-
-            var mercadosAbertos = result.Markets
+            var mercadosAbertos = cache.Markets
             .Where(x =>
             {
                 // converte as strings "09:30" e "16:15" para TimeSpan
@@ -65,7 +76,7 @@ namespace MarketDataCentralizer.Application.Services.MarketSituation
 
             foreach (var mercado in mercadosAbertos)
             {
-                var info = result.Markets.FirstOrDefault(x => x.Region == mercado);
+                var info = cache.Markets.FirstOrDefault(x => x.Region == mercado);
                 if (info != null)
                 {
                     listRequest.Add(info);

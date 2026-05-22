@@ -9,6 +9,8 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
         public readonly IBrApiRepository _brApiRepository;
         public readonly ICacheRepository _cacheRepository;
         public readonly ICacheValidator _cacheValidator;
+
+        private const string DataMarketBrPrefixKey = "BR";
         public DataMarketBrazilService(IBrApiRepository brApiRepository, ICacheRepository cacheRepository, ICacheValidator cacheValidator)
         {
             _brApiRepository = brApiRepository;
@@ -18,14 +20,14 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
 
         public async Task<BrApiRequest> GetAllBrApiDataAsync(string symbol)
         {
-            var response = await _cacheValidator.CacheValidatorAsync(symbol, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey,() => _brApiRepository.GetBrApiDataAsync(symbol));
 
             return response;
         }
 
         public async Task<List<BrApiModel>> GetListAssetsInfoAsync(string symbol)
         {
-            var response = await _cacheValidator.CacheValidatorAsync(symbol, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
 
             return response.BraApiResults;
         }
@@ -34,7 +36,7 @@ namespace MarketDataCentralizer.Application.Services.DataMarketBrazil
         public async Task<List<BrApiRegularModel>> GetRegularDataAsset(string symbol)
         {
 
-            var response = await _cacheValidator.CacheValidatorAsync(symbol, () => _brApiRepository.GetBrApiDataAsync(symbol));
+            var response = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, DataMarketBrPrefixKey, () => _brApiRepository.GetBrApiDataAsync(symbol));
 
             var listMessage = new List<BrApiRegularModel>();
 

@@ -16,6 +16,8 @@ namespace MarketDataCentralizer.Application.Services.Dividends
         private readonly IAlphaVantageRepository _alphaVantageRepository;
         private readonly ICacheValidator _cacheValidator;
 
+        private string PrefixKeyDividends = "Dividends";
+
         public StockDividendsService(IAlphaVantageRepository alphaVantageRepository,
             ICacheValidator cacheValidator)
         {
@@ -25,8 +27,7 @@ namespace MarketDataCentralizer.Application.Services.Dividends
 
         public async Task<StockDividendResponse> GetDividendResponseAsync(string symbol)
         {
-            var cachePrefix = "dividends";
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, cachePrefix,() => _alphaVantageRepository.GetDividendResponseAsync(symbol));
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, PrefixKeyDividends, () => _alphaVantageRepository.GetDividendResponseAsync(symbol));
 
             return isCached;
         }

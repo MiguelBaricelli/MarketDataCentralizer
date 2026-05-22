@@ -13,6 +13,9 @@ namespace MarketDataCentralizer.Application.Services.Overview
         private readonly ICacheRepository _cacheRepository;
         private readonly ICacheValidator _cacheValidator;
 
+        private string OverViewPrefixKey = "Overview";
+        private int DayInSeconds = 24 * 60 * 60;
+
 
         public DataOverviewService(IAlphaVantageOverviewConsumer alphaVantageOverviewConsumer, ICacheRepository cacheRepository, ICacheValidator cacheValidator)
         {
@@ -28,7 +31,11 @@ namespace MarketDataCentralizer.Application.Services.Overview
                 throw new ArgumentNullException("Ativo obrigatorio");
             }
 
-            var IsCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, "overview", () => _alphaVantageOverviewConsumer.OverviewConsumer(symbol)).ConfigureAwait(false);
+            var IsCache = await _cacheValidator.
+                CacheValidatorWithPrefixAndTimeAsync(symbol, 
+                OverViewPrefixKey, 
+                () => _alphaVantageOverviewConsumer.OverviewConsumer(symbol), 
+                DayInSeconds).ConfigureAwait(false);
              
             if (IsCache == null)
             {

@@ -11,6 +11,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
         private readonly IAlphaVantageWeeklyConsumer _consumer;
         private readonly ICacheValidator _cacheValidator;
 
+        private string WeeklyPrefixKey = "Weekly";
         public WeeklyDataForConsultService(IAlphaVantageWeeklyConsumer consumer, ICacheValidator cacheValidator)
         {
             _consumer = consumer;
@@ -25,8 +26,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             {
                 throw new ArgumentNullException("Precisa conter o simbolo");
             }
-            var prefixKey = "weeklyData";
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
             {
@@ -42,8 +42,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentNullException(nameof(symbol), "Precisa conter o símbolo");
 
-            var prefixKey = "weeklyData";
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
                 return null;
@@ -71,8 +70,7 @@ namespace MarketDataCentralizer.Application.Services.Weekly
                 return null;
             }
 
-            var prefixKey = "weeklyData";
-            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
+            var isCached = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, WeeklyPrefixKey, () => _consumer.TimeSeriesWeeklyConsumer(symbol)).ConfigureAwait(false);
 
             if (isCached == null)
                 return null;

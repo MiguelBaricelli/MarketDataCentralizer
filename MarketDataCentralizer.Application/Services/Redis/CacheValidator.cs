@@ -1,60 +1,57 @@
 ﻿using MarketDataCentralizer.Application.Interfaces;
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-
-namespace MarketDataCentralizer.Application.Services.Redis
+public class CacheValidator : ICacheValidator
 {
-    public class CacheValidator : ICacheValidator
+    private readonly ICacheRepository _cacheRepository;
+    private readonly ILogger<CacheValidator> _logger;
+
+    public CacheValidator(ICacheRepository cacheRepository, ILogger<CacheValidator> logger)
     {
-        private readonly ICacheRepository _cacheRepository;
-        public CacheValidator(ICacheRepository cacheRepository)
-        {
-            _cacheRepository = cacheRepository;
-        }
-
-        public async Task<T> CacheValidatorAsync<T>(string symbol, Func<Task<T>> fetchData) where T : class
-        {
-            if (string.IsNullOrEmpty(symbol))
-                return default;
-
-            var isCached = await _cacheRepository.GetAsync(symbol);
-            if (!string.IsNullOrWhiteSpace(isCached))
-                return JsonSerializer.Deserialize<T>(isCached);
-
-            // Cache miss — executa a função passada
-            var response = await fetchData();
-            if (response == null)
-                return default;
-
-            var json = JsonSerializer.Serialize(response);
-            await _cacheRepository.SetAsync(symbol, json, TimeSpan.FromSeconds(120));
-
-            return response;
-        }
-
-        public async Task<T> CacheValidatorWithPrefixAsync<T>(string symbol, string prefixKey, Func<Task<T>> fetchData) where T : class
-        {
-            if (string.IsNullOrEmpty(symbol))
-                return default;
-
-            var isCached = await _cacheRepository.GetAsync(symbol);
-            if (!string.IsNullOrWhiteSpace(isCached))
-                return JsonSerializer.Deserialize<T>(isCached);
-
-            // Cache miss — executa a função passada
-            var response = await fetchData();
-            if (response == null)
-                return default;
-
-            string cachePrefix = prefixKey + "-" + symbol;
-
-            var json = JsonSerializer.Serialize(response);
-            await _cacheRepository.SetAsync(cachePrefix, json, TimeSpan.FromSeconds(120));
-
-            return response;
-        }
-
-       
+        _cacheRepository = cacheRepository;
+        _logger = logger;
     }
+
+    private async Task<T> ExecuteCacheAsync<T>(string cacheKey, Func<Task<T>> fetchData, int time) where T : class
+    {
+        if (string.IsNullOrEmpty(cacheKey))
+            return default;
+
+        var isCached = await _cacheRepository.GetAsync(cacheKey);
+        if (!string.IsNullOrWhiteSpace(isCached))
+        {
+            _logger.LogInformation("[{Class}] [{Method}] Desserializando dados do cache. Chave: {Key}",
+                nameof(CacheValidator), nameof(ExecuteCacheAsync), cacheKey);
+
+            return JsonSerializer.Deserialize<T>(isCached);
+        }
+
+        var response = await fetchData();
+        if (response == null)
+            return default;
+
+        _logger.LogInformation("");
+        var json = JsonSerializer.Serialize(response);
+
+        _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s",
+        nameof(CacheValidator), nameof(ExecuteCacheAsync), cacheKey, time);
+
+        await _cacheRepository.SetAsync(cacheKey, json, TimeSpan.FromSeconds(time));
+
+        return response;
+    }
+
+    public Task<T> CacheValidatorAsync<T>(string prefix, Func<Task<T>> fetchData) where T : class
+        => ExecuteCacheAsync(prefix, fetchData, 120);
+
+    public Task<T> CacheValidatorWithTimeAsync<T>(string prefix, Func<Task<T>> fetchData, int time) where T : class
+        => ExecuteCacheAsync(prefix, fetchData, time);
+
+    public Task<T> CacheValidatorWithSymbolAsync<T>(string symbol, string prefixKey, Func<Task<T>> fetchData) where T : class
+        => ExecuteCacheAsync($"{prefixKey}-{symbol}", fetchData, 120);
+
+    public Task<T> CacheValidatorWithSymbolAndTimeAsync<T>(string symbol, string prefixKey, Func<Task<T>> fetchData, int time) where T : class
+        => ExecuteCacheAsync($"{prefixKey}-{symbol}", fetchData, time);
 }
