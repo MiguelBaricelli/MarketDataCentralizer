@@ -25,7 +25,7 @@ namespace MarketDataCentralizer.Application.Services.General
         public async Task<GeneralResponseModel> GeneralResponseServiceAsync(string symbol, DateTime date, FunctionAlphaVantageEnum vantageEnum)
         {
             var prefixKey = $"generalResponse:{symbol}:{vantageEnum}";
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixKey, 
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAsync(symbol, prefixKey, 
                 () => _alphaVantageGeneralConsumer.TimeSeriesGeneralConsumer(symbol, vantageEnum)).ConfigureAwait(false);
      
             // Escolhe a série conforme o enum solicitado; se não existir, faz fallback para a primeira série disponível

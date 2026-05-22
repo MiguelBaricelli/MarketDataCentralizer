@@ -8,6 +8,5 @@ namespace MarketDataCentralizer.Application.Interfaces
         Task<List<BrApiModel>> GetListAssetsInfoAsync(string symbol);
         Task<List<BrApiRegularModel>> GetRegularDataAsset(string symbol);
         Task<List<BrApiRegularModel>> GetRegularDataAssetTEST(string symbol);
-        Task<BrApiRequest> GetRequestBrApiAsync(string symbol);
     }
 }

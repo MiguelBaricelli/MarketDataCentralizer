@@ -11,7 +11,8 @@ namespace MarketDataCentralizer.Application.Services.Daily
         private readonly IAlphaVantageDailyConsumer _client;
         private readonly ICacheValidator _cacheValidator;
 
-
+        private string FinanceSummaryVariancePrefixKey = "FinanceSummaryVariance";
+        private int DayInSeconds = 24 * 60 * 60;
         public FinanceSummaryVarianceService(IAlphaVantageDailyConsumer client, ICacheValidator cacheValidator)
         {
             _client = client;
@@ -26,8 +27,7 @@ namespace MarketDataCentralizer.Application.Services.Daily
                 throw new ArgumentNullException("Ativo é obrigatorio");
             }
 
-            var prefixKey = "financeSummaryVariance";
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(ativo, prefixKey, () => _client.TimeSeriesDailyConsumer(ativo)).ConfigureAwait(false);
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAndTimeAsync(ativo, FinanceSummaryVariancePrefixKey, () => _client.TimeSeriesDailyConsumer(ativo), DayInSeconds).ConfigureAwait(false);
             
 
             string dateKey = date.ToString("yyyy-MM-dd");

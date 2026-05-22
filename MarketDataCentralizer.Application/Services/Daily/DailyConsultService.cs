@@ -10,6 +10,9 @@ namespace MarketDataCentralizer.Application.Services.Daily
         private readonly IAlphaVantageDailyConsumer _vantageDailyConsumer;
         private readonly ICacheValidator _cacheValidator;
 
+        private string DailyDataPrefixKey = "Daily";
+        private int dayInSeconds = 24 * 60 * 60;
+
         public DailyConsultService(IAlphaVantageDailyConsumer vantageDailyConsumer, ICacheValidator cacheValidator)
         {
             _vantageDailyConsumer = vantageDailyConsumer;
@@ -24,8 +27,7 @@ namespace MarketDataCentralizer.Application.Services.Daily
                 throw new ArgumentException("O símbolo não pode ser nulo ou vazio.", nameof(symbol));
             }
 
-            var prefixkey = "dailyData";
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixkey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol)).ConfigureAwait(false);
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAndTimeAsync(symbol, DailyDataPrefixKey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol), dayInSeconds).ConfigureAwait(false);
 
             if (isCache == null || isCache.TimeSeriesDaily == null)
             {
@@ -40,8 +42,7 @@ namespace MarketDataCentralizer.Application.Services.Daily
             {
                 throw new ArgumentException("O símbolo não pode ser nulo ou vazio.", nameof(symbol));
             }
-            var prefixkey = "dailyData";
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixkey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol)).ConfigureAwait(false);
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAndTimeAsync(symbol, DailyDataPrefixKey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol), dayInSeconds).ConfigureAwait(false);
 
             // Ordena as entradas por data (chave do dicionário) em ordem decrescente e pega as 10 mais recentes
             var lastTenDailys = isCache.TimeSeriesDaily
@@ -63,8 +64,7 @@ namespace MarketDataCentralizer.Application.Services.Daily
             {
                 throw new ArgumentException("O símbolo não pode ser nulo ou vazio.", nameof(symbol));
             }
-            var prefixkey = "dailyData";
-            var isCache = await _cacheValidator.CacheValidatorWithPrefixAsync(symbol, prefixkey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol)).ConfigureAwait(false);
+            var isCache = await _cacheValidator.CacheValidatorWithSymbolAndTimeAsync(symbol, DailyDataPrefixKey, () => _vantageDailyConsumer.TimeSeriesDailyConsumer(symbol), dayInSeconds).ConfigureAwait(false);
 
             // Ordena as entradas por data (chave do dicionário) em ordem decrescente e pega as 10 mais recentes
             var lastTwentyDailys = isCache.TimeSeriesDaily

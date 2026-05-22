@@ -28,7 +28,7 @@ namespace MarketDataCentralizer.Controllers.V1.Daily
         /// <param name="ativo">Símbolo do ativo (ex.: MSFT, AAPL, IBM)</param>
         /// <returns>Objeto FinanceSummaryDto com variância e status do ativo</returns>
         [Authorize]
-        [HttpGet("GetVariationAsset/{ativo}/{date}")]
+        [HttpGet("EUA/VariationAsset/{ativo}/{date}")]
         [ProducesResponseType(typeof(FinanceSummaryDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(FinanceSummaryDto), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(FinanceSummaryDto), StatusCodes.Status404NotFound)]
@@ -63,7 +63,7 @@ namespace MarketDataCentralizer.Controllers.V1.Daily
         /// <param name="ativo">Símbolo do ativo (ex.: MSFT, AAPL, IBM)</param>
         /// <returns>Objeto FinanceSummaryDto com variância e status do ativo</returns>
         
-        [HttpGet("GetAllData/{ativo}")]
+        [HttpGet("EUA/AllData/{ativo}")]
         [ProducesResponseType(typeof(Dictionary<string, AlphaVantageDailyDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Dictionary<string, AlphaVantageDailyDto>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Dictionary<string, AlphaVantageDailyDto>), StatusCodes.Status404NotFound)]

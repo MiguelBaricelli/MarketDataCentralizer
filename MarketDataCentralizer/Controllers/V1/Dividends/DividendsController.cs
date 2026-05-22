@@ -16,7 +16,7 @@ namespace MarketDataCentralizer.Controllers.V1.Dividends
 
         }
 
-        [HttpGet("GetDividends/{symbol}")]
+        [HttpGet("EUA/Dividends/{symbol}")]
         [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status404NotFound)]

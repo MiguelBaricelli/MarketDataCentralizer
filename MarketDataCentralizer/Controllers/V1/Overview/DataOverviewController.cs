@@ -20,7 +20,7 @@ namespace MarketDataCentralizer.Controllers.V1.Overview
         /// <summary>
         /// 
         [Authorize]
-        [HttpGet("GetOverviewData/{ativo}")]
+        [HttpGet("EUA/OverviewData/{ativo}")]
         [ProducesResponseType(typeof(OverviewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(OverviewModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(OverviewModel), StatusCodes.Status404NotFound)]
@@ -49,7 +49,7 @@ namespace MarketDataCentralizer.Controllers.V1.Overview
         /// <summary>
         /// 
         [Authorize]
-        [HttpGet("GetSummaryCompany/{ativo}")]
+        [HttpGet("EUA/SummaryCompany/{ativo}")]
         [ProducesResponseType(typeof(SummaryCompanyOverviewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(SummaryCompanyOverviewDto), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(SummaryCompanyOverviewDto), StatusCodes.Status404NotFound)]

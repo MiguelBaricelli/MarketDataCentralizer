@@ -52,7 +52,10 @@ namespace MarketDataCentralizer.Infrastructure.ExternalApis
                 JsonSerializer.Deserialize<MarketSituationResponse>(json, options)
                 ?? throw new Exception("Resposta inválida dos dados de situacao de mercado");
 
-            _logger.LogInformation($"Dados foram deserializados com sucesso: {data}");
+            _logger.LogInformation("[{Class}] [{Method}] Dados foram deserializados com sucesso: {data}",
+                nameof(GlobalMarketSituationConsumer),
+                nameof(GetMarketSituationIntegration),
+                data);
 
             if (data == null || data.Markets.Count <= 0)
             {

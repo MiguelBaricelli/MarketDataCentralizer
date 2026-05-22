@@ -20,7 +20,7 @@ namespace MarketDataCentralizer.Controllers.V1.General
         }
 
         [Authorize]
-        [HttpGet("GetGeneral/{asset}/{date}/{function}")]
+        [HttpGet("EUA/General/{asset}/{date}/{function}")]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status404NotFound)]
@@ -52,7 +52,7 @@ namespace MarketDataCentralizer.Controllers.V1.General
         }
 
         [Authorize]
-        [HttpGet("GetGeneralDataByQuantity/{asset}/{date}/{function}/{n}")]
+        [HttpGet("EUA/GeneralDataByQuantity/{asset}/{date}/{function}/{n}")]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(FinanceDataModel), StatusCodes.Status404NotFound)]
