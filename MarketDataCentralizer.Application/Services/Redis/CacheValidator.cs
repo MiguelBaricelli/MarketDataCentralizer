@@ -9,11 +9,14 @@ namespace MarketDataCentralizer.Application.Services.Redis
     {
         private readonly ICacheRepository _cacheRepository;
         private readonly ILogger<CacheValidator> _logger;
+        private readonly string _environment;
 
-        public CacheValidator(ICacheRepository cacheRepository, ILogger<CacheValidator> logger)
+
+        public CacheValidator(ICacheRepository cacheRepository, ILogger<CacheValidator> logger, string environment)
         {
             _cacheRepository = cacheRepository;
             _logger = logger;
+            _environment = environment;
         }
 
         public async Task<T> CacheValidatorAsync<T>(string prefix, Func<Task<T>> fetchData) where T : class
@@ -36,8 +39,8 @@ namespace MarketDataCentralizer.Application.Services.Redis
 
             var json = JsonSerializer.Serialize(response);
 
-            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s",
-                nameof(CacheValidator), nameof(CacheValidatorAsync), prefix, 120);
+            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s / Host:{Enviroment}",
+                nameof(CacheValidator), nameof(CacheValidatorAsync), prefix, 120, _environment);
 
             await _cacheRepository.SetAsync(prefix, json, TimeSpan.FromSeconds(120));
 
@@ -64,8 +67,8 @@ namespace MarketDataCentralizer.Application.Services.Redis
 
             var json = JsonSerializer.Serialize(response);
 
-            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s",
-                nameof(CacheValidator), nameof(CacheValidatorWithTimeAsync), prefix, time);
+            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s / Host:{Enviroment}",
+                nameof(CacheValidator), nameof(CacheValidatorWithTimeAsync), prefix, time, _environment);
 
             await _cacheRepository.SetAsync(prefix, json, TimeSpan.FromSeconds(time));
 
@@ -77,7 +80,7 @@ namespace MarketDataCentralizer.Application.Services.Redis
             if (string.IsNullOrEmpty(symbol))
                 return default;
 
-            string cacheKey = $"{prefixKey}:{symbol}";
+            string cacheKey = $"{_environment}:{prefixKey}:{symbol}";
 
             var isCached = await _cacheRepository.GetAsync(cacheKey);
             if (!string.IsNullOrWhiteSpace(isCached))
@@ -94,8 +97,8 @@ namespace MarketDataCentralizer.Application.Services.Redis
 
             var json = JsonSerializer.Serialize(response);
 
-            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s",
-                nameof(CacheValidator), nameof(CacheValidatorWithSymbolAsync), cacheKey, 120);
+            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s / Host:{Enviroment}",
+                nameof(CacheValidator), nameof(CacheValidatorWithSymbolAsync), cacheKey, 120, _environment);
 
             await _cacheRepository.SetAsync(cacheKey, json, TimeSpan.FromSeconds(120));
 
@@ -107,7 +110,7 @@ namespace MarketDataCentralizer.Application.Services.Redis
             if (string.IsNullOrEmpty(symbol))
                 return default;
 
-            string cacheKey = $"{prefixKey}:{symbol}";
+            string cacheKey = $"{_environment}:{prefixKey}:{symbol}";
 
             var isCached = await _cacheRepository.GetAsync(cacheKey);
             if (!string.IsNullOrWhiteSpace(isCached))
@@ -124,8 +127,8 @@ namespace MarketDataCentralizer.Application.Services.Redis
 
             var json = JsonSerializer.Serialize(response);
 
-            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s",
-                nameof(CacheValidator), nameof(CacheValidatorWithSymbolAndTimeAsync), cacheKey, time);
+            _logger.LogInformation("[{Class}] [{Method}] SET - Armazenando no cache. Chave: {Key} / Tempo: {Time}s / host:{Enviroment}",
+                nameof(CacheValidator), nameof(CacheValidatorWithSymbolAndTimeAsync), cacheKey, time, _environment);
 
             await _cacheRepository.SetAsync(cacheKey, json, TimeSpan.FromSeconds(time));
 
