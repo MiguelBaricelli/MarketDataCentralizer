@@ -8,11 +8,14 @@ using MarketDataCentralizer.Application.Services.MarketSituation;
 using MarketDataCentralizer.Application.Services.Overview;
 using MarketDataCentralizer.Application.Services.Redis;
 using MarketDataCentralizer.Application.Services.Weekly;
+using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models.ApiClientSecurity;
 using MarketDataCentralizer.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -163,13 +166,22 @@ builder.Services.AddScoped<IGeneralResponseService, GeneralResponseService>();
 builder.Services.AddScoped<IDailyConsultService, DailyConsultService>();
 builder.Services.AddScoped<IDataMarketBrazilService, DataMarketBrazilService>();
 builder.Services.AddScoped<RedisTestService>();
-builder.Services.AddScoped<ICacheValidator, CacheValidator>();
 builder.Services.AddScoped<IStockDividendsService, StockDividendsService>();
 builder.Services.AddScoped<MarketSituationService>();
 
 // ================= INFRASTRUCTURE =================
 builder.Services.AddHttpClient();
-builder.Services.AddDependencyInjection(builder.Configuration, bootstrapLogger);
+builder.Services.AddDependencyInjection(builder.Configuration, builder.Environment,bootstrapLogger);
+
+//REDIS
+builder.Services.AddScoped<ICacheValidator>(sp =>
+{
+    var cache = sp.GetRequiredService<ICacheRepository>();
+    var cacheLogger = sp.GetRequiredService<ILogger<CacheValidator>>();
+    return new CacheValidator(cache, cacheLogger, builder.Environment.EnvironmentName);
+});
+bootstrapLogger.LogInformation("Redis configurado com sucesso. Ambiente: {Environment}", builder.Environment.EnvironmentName);
+
 
 // ================= CONTROLLERS =================
 builder.Services.AddControllers()

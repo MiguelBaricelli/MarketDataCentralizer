@@ -8,6 +8,7 @@ using MarketDataCentralizer.Infrastructure.Repository.AlphaVantage;
 using MarketDataCentralizer.Infrastructure.Repository.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace MarketDataCentralizer.Infrastructure.DependencyInjection
@@ -18,6 +19,7 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
         public static IServiceCollection AddDependencyInjection(
         this IServiceCollection services,
         IConfiguration configuration,
+        IHostEnvironment hostEnvironment,
         ILogger? logger = null)
         {
             // ================= CONSUMERS =================
