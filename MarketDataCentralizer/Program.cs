@@ -11,6 +11,8 @@ using MarketDataCentralizer.Application.Services.Weekly;
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models.ApiClientSecurity;
 using MarketDataCentralizer.Infrastructure.DependencyInjection;
+using MarketDataCentralizer.Infrastructure.RabbitMq;
+using MarketDataCentralizer.Infrastructure.RabbitMq.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -172,6 +174,8 @@ builder.Services.AddScoped<MarketSituationService>();
 // ================= INFRASTRUCTURE =================
 builder.Services.AddHttpClient();
 builder.Services.AddDependencyInjection(builder.Configuration, builder.Environment,bootstrapLogger);
+
+builder.Services.AddRabbitMq(builder.Configuration);
 
 //REDIS
 builder.Services.AddScoped<ICacheValidator>(sp =>

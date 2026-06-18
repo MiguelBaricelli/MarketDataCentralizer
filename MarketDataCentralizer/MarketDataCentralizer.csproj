@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MarketDataCentralizer.Application\MarketDataCentralizer.Application.csproj" />
+    <ProjectReference Include="..\MarketDataCentralizer.Infrastructure.RabbitMq\MarketDataCentralizer.Infrastructure.RabbitMq.csproj" />
 	<ProjectReference Include="..\MarketDataCentralizer.Infrastructure\MarketDataCentralizer.Infrastructure.csproj" />
   </ItemGroup>
 
