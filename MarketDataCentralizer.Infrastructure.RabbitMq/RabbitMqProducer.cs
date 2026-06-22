@@ -1,4 +1,5 @@
 ﻿using MarketDataCentralizer.Infrastructure.RabbitMq.Connection;
+using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Queues;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Text;
@@ -8,15 +9,18 @@ public class RabbitMqProducer
 {
     private readonly IRabbitMqConnection _connection;
     private readonly ILogger<RabbitMqProducer> _logger;
+    private readonly ExchengesExtensions _messaginsQueues;
 
-    public RabbitMqProducer(IRabbitMqConnection connection, ILogger<RabbitMqProducer> logger )
+
+    public RabbitMqProducer(IRabbitMqConnection connection, ILogger<RabbitMqProducer> logger, ExchengesExtensions messaginsQueues )
     {
         _connection = connection;
         _logger = logger;
+        _messaginsQueues = messaginsQueues;
     }
 
     public async Task PublishAsync<T>(
-        string queueName,
+        string routingKey,
         T message)
     {
 
@@ -31,10 +35,10 @@ public class RabbitMqProducer
                  { "x-message-ttl", 86400000 } 
             };
 
-            await channel.QueueDeclareAsync(
-                queue: queueName,
+            await channel.ExchangeDeclareAsync(
+                exchange: _messaginsQueues.MarketDataCentralizer,
+                type: ExchangeType.Topic,
                 durable: true,
-                exclusive: false,
                 autoDelete: false,
                 arguments);
 
@@ -44,13 +48,13 @@ public class RabbitMqProducer
             var properties = new BasicProperties { Persistent = true };
 
             await channel.BasicPublishAsync(
-                exchange: string.Empty,
-                routingKey: queueName,
+                exchange: _messaginsQueues.MarketDataCentralizer,
+                routingKey: routingKey,
                 mandatory: false,
                 basicProperties: properties,
                 body: body);
 
-            _logger.LogInformation("[{Class}] [{Method}] Mensagem publicada na fila {Queue}", nameof(RabbitMqProducer), nameof(PublishAsync), queueName);
+            _logger.LogInformation("[{Class}] [{Method}] Mensagem publicada na fila {Queue}", nameof(RabbitMqProducer), nameof(PublishAsync), routingKey);
         }
         catch (Exception e)
         {

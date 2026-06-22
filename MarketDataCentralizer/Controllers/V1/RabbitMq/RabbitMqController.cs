@@ -1,4 +1,4 @@
-﻿using MarketDataCentralizer.Infrastructure.RabbitMq.Messages;
+﻿using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Messages;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketDataCentralizer.Controllers.V1.RabbitMq
@@ -30,7 +30,7 @@ namespace MarketDataCentralizer.Controllers.V1.RabbitMq
             };
 
             await _producer.PublishAsync(
-                "",
+                "market_situation",
                 evt);
 
             return Ok("Mensagem enviada");

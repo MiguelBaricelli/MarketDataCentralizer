@@ -1,4 +1,5 @@
 ﻿using MarketDataCentralizer.Infrastructure.RabbitMq.Connection;
+using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Queues;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -49,6 +50,8 @@ public static class Installer
 
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddScoped<RabbitMqProducer>();
+
+        services.AddSingleton<ExchengesExtensions>();
 
         return services;
     }

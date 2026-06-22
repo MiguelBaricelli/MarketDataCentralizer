@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketDataCentralizer.Infrastructure.RabbitMq.Messages
+namespace MarketDataCentralizer.Infrastructure.RabbitMq.Models.Messages
 {
     public class MarketSituationMessageEvent
     {
