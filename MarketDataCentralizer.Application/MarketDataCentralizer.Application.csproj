@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MarketDataCentralizer.Domain\MarketDataCentralizer.Domain.csproj" />
+    <ProjectReference Include="..\MarketDataCentralizer.Infrastructure.RabbitMq\MarketDataCentralizer.Infrastructure.RabbitMq.csproj" />
   </ItemGroup>
 
 </Project>

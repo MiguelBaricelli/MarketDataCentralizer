@@ -21,7 +21,8 @@ public class RabbitMqProducer
 
     public async Task PublishAsync<T>(
         string routingKey,
-        T message)
+        T message,
+        CancellationToken cancellationToken)
     {
 
         try

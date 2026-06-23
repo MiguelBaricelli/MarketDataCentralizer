@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer", "MarketDataCentralizer\MarketDataCentralizer.csproj", "{DE0A2116-FA8A-4385-AAA0-8BA8B4211558}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Application", "MarketDataCentralizer.Application\MarketDataCentralizer.Application.csproj", "{F39B95B7-FE13-40C2-B156-B84419E0B3F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A70E8AD4-C524-42FF-87F7-FCEBF89D7A1C} = {A70E8AD4-C524-42FF-87F7-FCEBF89D7A1C}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Domain", "MarketDataCentralizer.Domain\MarketDataCentralizer.Domain.csproj", "{F26F60B3-129D-48C1-9B67-B3609F7D6BD2}"
 EndProject
@@ -17,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{595BAF3E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Tests", "MarketDataCentralizer.Tests\MarketDataCentralizer.Tests.csproj", "{121E8F6D-460E-4FEB-985B-364BCB30DAEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketDataCentralizer.Infrastructure.RabbitMq", "MarketDataCentralizer.Infrastructure.RabbitMq\MarketDataCentralizer.Infrastructure.RabbitMq.csproj", "{A70E8AD4-C524-42FF-87F7-FCEBF89D7A1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketDataCentralizer.Infrastructure.RabbitMq", "MarketDataCentralizer.Infrastructure.RabbitMq\MarketDataCentralizer.Infrastructure.RabbitMq.csproj", "{A70E8AD4-C524-42FF-87F7-FCEBF89D7A1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

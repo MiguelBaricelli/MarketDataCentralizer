@@ -1,4 +1,5 @@
-﻿using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Messages;
+﻿using MarketDataCentralizer.Application.Messaging.Orchestrator;
+using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Messages;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketDataCentralizer.Controllers.V1.RabbitMq
@@ -7,33 +8,20 @@ namespace MarketDataCentralizer.Controllers.V1.RabbitMq
     [Route("api/v1/[controller]")]
     public class RabbitMqController : ControllerBase
     {
-        private readonly RabbitMqProducer _producer;
+        private readonly MarketDataSyncOrchestrator _marketDataSyncOrchestrator;
 
         public RabbitMqController(
-            RabbitMqProducer producer)
+            MarketDataSyncOrchestrator marketDataSyncOrchestrator)
         {
-            _producer = producer;
+            _marketDataSyncOrchestrator = marketDataSyncOrchestrator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Publish()
+        [HttpPost("run")]
+        public async Task<IActionResult> Publish(CancellationToken cancellationToken)
         {
-            var evt = new MarketSituationMessageEvent
-            {
-               Current_Status = "Fechado",
-                Local_Close = "17:00",
-                Local_Open = "09:30",
-                Market_Type = "Ações",
-                Notes = "Mercado fechado",
-                Primary_Exchanges = "B3",
-                Region = "Brasil"
-            };
-
-            await _producer.PublishAsync(
-                "market_situation",
-                evt);
-
-            return Ok("Mensagem enviada");
+            await _marketDataSyncOrchestrator.SyncAndPublishAsync(cancellationToken);
+            return Ok("Mensagens sendo publicadas");
+            
         }
     }
 }
