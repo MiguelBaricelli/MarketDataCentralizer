@@ -2,7 +2,10 @@
 using MarketDataCentralizer.Application.Services.MarketSituation;
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models;
+using MarketDataCentralizer.Domain.Models.BraApi;
+using MarketDataCentralizer.Domain.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 
 namespace MarketDataCentralizer.Application.DataCollector
@@ -11,6 +14,8 @@ namespace MarketDataCentralizer.Application.DataCollector
     {
 
         private readonly MarketSituationService _marketSituationService;
+        private readonly IDataMarketBrazilService _dataMarketBrazilService;
+        private readonly IStockDividendsService _stockDividendsService;
         private readonly ILogger<MarketDataCollector> _logger;
 
         IEnumerable<string> listaAtivosEua = new List<string>
@@ -18,14 +23,23 @@ namespace MarketDataCentralizer.Application.DataCollector
             "AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NVDA", "JPM"
         };
 
-        IEnumerable<MarketSituationResponse> Markets = new List<MarketSituationResponse>();
+        IEnumerable<string> listaAtivosBr = new List<string>
+        {
+            "PETR4", "VALE3"
+        };
+
+        IEnumerable<MarketSituationResponse> ListUniversal = new List<MarketSituationResponse>();
         private DateTime DateInitial = new DateTime(2026, 6, 20);
 
         public MarketDataCollector(
-            MarketSituationService market,
+            MarketSituationService marketSituationService,
+            IDataMarketBrazilService dataMarketBrazilService,
+            IStockDividendsService stockDividendsService,
             ILogger<MarketDataCollector> logger)
         {     
-            _marketSituationService = market;
+            _marketSituationService = marketSituationService;
+            _dataMarketBrazilService = dataMarketBrazilService;
+            _stockDividendsService = stockDividendsService;
             _logger = logger;
         }
 
@@ -50,6 +64,42 @@ namespace MarketDataCentralizer.Application.DataCollector
 
             return situationInfos;
            
+        }
+
+        public async Task<List<BrApiRequest>> CollectBRDataMarket(
+        CancellationToken cancellationToken)
+        {
+            List<BrApiRequest> listData = new List<BrApiRequest>();
+
+            foreach(var asset in listaAtivosBr)
+            {
+                var data = await _dataMarketBrazilService.GetAllBrApiDataAsync(asset);
+
+                listData.Add(data);
+            }
+           
+            _logger?.LogInformation("Dados da B3 obtidos Qtd: {Status}", listData.Count);
+
+            return listData;
+
+        }
+
+        public async Task<List<StockDividendResponse>> CollectDividendsDataMarket(
+        CancellationToken cancellationToken)
+        {
+            List<StockDividendResponse> listData = new List<StockDividendResponse>();
+
+            foreach (var asset in listaAtivosEua)
+            {
+                var data = await _stockDividendsService.GetDividendResponseAsync(asset);
+
+                listData.Add(data);
+            }
+
+            _logger?.LogInformation("Dados da Bolsa americana sobre dividendos obtidos Qtd: {Status}", listData.Count);
+
+            return listData;
+
         }
     }
 }

@@ -2,6 +2,7 @@
 using MarketDataCentralizer.Domain.Models;
 using MarketDataCentralizer.Infrastructure.RabbitMq.Models.Queues;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 
 namespace MarketDataCentralizer.Application.Messaging.Orchestrator
@@ -31,28 +32,55 @@ namespace MarketDataCentralizer.Application.Messaging.Orchestrator
 
         public async Task SyncAndPublishAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Iniciando sincronização para {Count} ativos.", _symbols.Count());
+            _logger.LogInformation("{[Class]} {[Method]} Iniciando sincronização para {Count} ativos.", nameof(MarketDataSyncOrchestrator), nameof(SyncAndPublishAsync), _symbols.Count());
+            var wacth = Stopwatch.StartNew();
 
-            // 1. Coleta os dados (passando a lista de símbolos e o token)
-            var rawData = await _collector.CollectSituationMarket(
-                cancellationToken);
+            // Dispara todas as coletas em paralelo
+            var situationTask = _collector.CollectSituationMarket(cancellationToken);
+            var brDataTask = _collector.CollectBRDataMarket(cancellationToken);
+            var dividendsTask = _collector.CollectDividendsDataMarket(cancellationToken);
 
-            if (rawData == null || !rawData.Any())
+            // Aguarda todas as tarefas concluírem
+            await Task.WhenAll(situationTask, brDataTask, dividendsTask);
+
+            var situationData = await situationTask;
+            var brData = await brDataTask;
+            var dividendsData = await dividendsTask;
+
+            // 1. Publica dados de situação do mercado (EUA)
+            _logger.LogInformation("{[Class]} {[Method]} Publicando {Count} dados de situação de mercado.", nameof(MarketDataSyncOrchestrator), nameof(SyncAndPublishAsync), situationData?.Count ?? 0);
+            if (situationData != null && situationData.Any())
             {
-                _logger.LogWarning("Nenhum dado retornado pelo coletor.");
-                return;
+                foreach (var item in situationData)
+                {
+                    await _broker.PublishAsync(RoutingKey.MarketSituation.ToRoutingKey(), item, cancellationToken);
+                }
             }
 
-
-            foreach (var item in rawData)
+            // 2. Publica dados da B3 (Brasil)
+            _logger.LogInformation("{[Class]} {[Method]} Publicando {Count} dados da B3.", nameof(MarketDataSyncOrchestrator), nameof(SyncAndPublishAsync), brData?.Count ?? 0);
+            if (brData != null && brData.Any())
             {
-                await _broker.PublishAsync(
-                    "market_situation",
-                    item,
-                    cancellationToken);
+                foreach (var item in brData)
+                {
+                    // Usa routing key específica para dados da B3
+                    await _broker.PublishAsync(RoutingKey.MarketSituation.ToRoutingKey(), item, cancellationToken);
+                }
             }
 
-            _logger.LogInformation("Publicados {Count} itens com sucesso.", rawData.Count());
+            // 3. Publica dados de dividendos
+            _logger.LogInformation("{[Class]} {[Method]} Publicando {Count} dados de dividendos.", nameof(MarketDataSyncOrchestrator), nameof(SyncAndPublishAsync), dividendsData?.Count ?? 0);
+            if (dividendsData != null && dividendsData.Any())
+            {
+                foreach (var item in dividendsData)
+                {
+                    await _broker.PublishAsync(RoutingKey.MarketSituation.ToRoutingKey(), item, cancellationToken);
+                }
+            }
+
+            wacth.Stop();
+
+            _logger.LogInformation("{[Class]} {[Method]} Publicacoes concluída com sucesso. Tempo: {Time} ms", nameof(MarketDataSyncOrchestrator), nameof(SyncAndPublishAsync), wacth.ElapsedMilliseconds);
         }
     }
 }
