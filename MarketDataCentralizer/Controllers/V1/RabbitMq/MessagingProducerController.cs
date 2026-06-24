@@ -6,17 +6,17 @@ namespace MarketDataCentralizer.Controllers.V1.RabbitMq
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class RabbitMqController : ControllerBase
+    public class MessagingProducerController : ControllerBase
     {
         private readonly MarketDataSyncOrchestrator _marketDataSyncOrchestrator;
 
-        public RabbitMqController(
+        public MessagingProducerController(
             MarketDataSyncOrchestrator marketDataSyncOrchestrator)
         {
             _marketDataSyncOrchestrator = marketDataSyncOrchestrator;
         }
 
-        [HttpPost("run")]
+        [HttpPost("run/all")]
         public async Task<IActionResult> Publish(CancellationToken cancellationToken)
         {
             await _marketDataSyncOrchestrator.SyncAndPublishAsync(cancellationToken);
