@@ -19,7 +19,7 @@ namespace MarketDataCentralizer.Domain.Models.BraApi
         public decimal? regularMarketChange { get; set; }
         public decimal? regularMarketChangePercent { get; set; }
         public string? regularMarketTime { get; set; }
-        public  long? marketCap { get; set; }
+        public  decimal? marketCap { get; set; }
         public int? regularMarketVolume { get; set; }
         public decimal? regularMarketPreviousClose { get; set; }
         public decimal? regularMarketOpen { get; set; }
