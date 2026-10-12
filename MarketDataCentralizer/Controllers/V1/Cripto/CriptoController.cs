@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MarketDataCentralizer.Domain.Interfaces.Cripto;
+using Microsoft.AspNetCore.Mvc;
 using static System.Net.WebRequestMethods;
 
 namespace MarketDataCentralizer.Controllers.V1.Cripto
@@ -8,23 +9,35 @@ namespace MarketDataCentralizer.Controllers.V1.Cripto
     public class CriptoController : ControllerBase
     {
 
-
-        public CriptoController()
+        private readonly ICriptoConsumeService _criptoService;
+        private readonly ILogger<CriptoController> _logger;
+        public CriptoController(ICriptoConsumeService criptoService, ILogger<CriptoController> logger)
         {
-              
+            _criptoService = criptoService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult GetCriptoDataAsync(string symbol)
+        public async Task<IActionResult> GetCriptoDataAsync([FromQuery]List<string> symbols)
         {
-            var url = $"https://pro-api.coingecko.com/api/v3/simple/price";
-
-            var queryParams = new Dictionary<string, string>
+            try
             {
-                { "ids", symbol },
-                { "vs_currencies", "usd" }
-            };
+                var result = await _criptoService.GetCriptoDataAsync(symbols);
 
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            } catch(Exception ex)
+            {
+                _logger.LogError("[{Class}] [{Method}] Erro ao buscar dados de cripto {Ex}",
+                    nameof(CriptoController),
+                    nameof(GetCriptoDataAsync), 
+                    ex.Message);
+                throw;
+            }
+            
         }
     }
 }

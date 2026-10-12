@@ -1,7 +1,10 @@
-﻿using MarketDataCentralizer.Domain.Interfaces.Infra;
+﻿using MarketDataCentralizer.Application.Services.Cripto;
+using MarketDataCentralizer.Domain.Interfaces.Cripto;
+using MarketDataCentralizer.Domain.Interfaces.Infra;
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Infrastructure.ExternalApis;
 using MarketDataCentralizer.Infrastructure.ExternalApis.Brapi;
+using MarketDataCentralizer.Infrastructure.ExternalApis.Cripto;
 using MarketDataCentralizer.Infrastructure.Redis;
 using MarketDataCentralizer.Infrastructure.Repository;
 using MarketDataCentralizer.Infrastructure.Repository.AlphaVantage;
@@ -10,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Http;
 
 namespace MarketDataCentralizer.Infrastructure.DependencyInjection
 {
@@ -30,6 +34,27 @@ namespace MarketDataCentralizer.Infrastructure.DependencyInjection
             services.AddScoped<IAlphaVantageDividendsConsumer, AlphaVantageDividendsConsumer>();
             services.AddScoped<IBrApiIntegrationConsumer, BrApiIntegrationConsumer>();
             services.AddScoped<IGlobalMarketSituationConsumer, GlobalMarketSituationConsumer>();
+
+            // ================= Cripto Consumer =================
+            var coinGeckoOptions = configuration
+            .GetSection(CriptoConfiguration.SectionName);
+            
+            var coinGeckoConfig = new CriptoConfiguration
+            {
+                BaseUrl = coinGeckoOptions["BaseUrl"] ?? string.Empty,
+                HeaderName = coinGeckoOptions["HeaderName"] ?? string.Empty,
+                ApiKey = coinGeckoOptions["ApiKey"] ?? string.Empty
+            };
+
+            services.AddHttpClient<ICriptoIntegration, CriptoIntegration>(
+                client =>
+                {
+                    client.BaseAddress = new Uri(coinGeckoConfig.BaseUrl);
+                    client.DefaultRequestHeaders.Add(coinGeckoConfig.HeaderName, coinGeckoConfig.ApiKey);
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("MarketDataCentralizer/1.0");
+                    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+
+                });
 
             logger?.LogDebug("Consumers registrados.");
 

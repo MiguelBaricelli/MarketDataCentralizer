@@ -1,10 +1,12 @@
-﻿using MarketDataCentralizer.Domain.Models.Cripto;
+﻿using MarketDataCentralizer.Domain.Interfaces.Cripto;
+using MarketDataCentralizer.Domain.Models.Cripto;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using System.Text.Json;
 
 namespace MarketDataCentralizer.Infrastructure.ExternalApis.Cripto
 {
-    public class CriptoIntegration
+    public class CriptoIntegration : ICriptoIntegration
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<CriptoIntegration> _logger;
@@ -17,17 +19,27 @@ namespace MarketDataCentralizer.Infrastructure.ExternalApis.Cripto
             _logger = logger;
         }
 
-        public async Task<ResponseCriptoModel> ResultCriptoPriceAsync()
+        public async Task<ResponseCriptoModel> ResultCriptoPriceAsync(List<string> symbols)
         {
             try
             {
-                var url = $"https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd,brl";
+                // Normaliza (minúsculas, sem espaços, sem duplicados) e codifica para a URL
+                var ids = string.Join(",",
+                    symbols
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Select(s => s.Trim().ToLowerInvariant())
+                        .Distinct()
+                        .Select(Uri.EscapeDataString));
 
-                var response = await _httpClient.GetAsync(url);
+                var url = $"simple/price?ids={ids}&vs_currencies=usd,brl";
+
+                using var response = await _httpClient.GetAsync(url);
+
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"Erro ao consultar a API de Criptoativos. Status: {response.StatusCode}");
+                    throw new HttpRequestException(
+                        $"Erro ao consultar CoinGecko. Status: {response.StatusCode}");
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -47,6 +59,10 @@ namespace MarketDataCentralizer.Infrastructure.ExternalApis.Cripto
                     Console.WriteLine("Dados do json vieram nulos ou vazios");
                     throw new Exception("Dados do json vieram nulos ou vazios");
                 }
+
+                _logger.LogInformation("[{Class}] [{Method}] Dados de cripto {Dados} obtidos com sucesso em {Data}", 
+                    nameof(CriptoIntegration), nameof(ResultCriptoPriceAsync),
+                    data, DateTime.Now);
 
                 return data;
 

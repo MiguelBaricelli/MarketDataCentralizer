@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 
 namespace MarketDataCentralizer.Domain.Models.Cripto
 {
-    public class ResponseCriptoModel
+    public class ResponseCriptoModel : Dictionary<string, CriptoPriceModel>
     {
-        public required string CoinId { get; init; }
-        public Dictionary<string, Dictionary<string, decimal>> Prices { get; init; } = [];
+    } 
+
+    public class CriptoPriceModel
+    {
+        public decimal Usd { get; set; }
+
+        public decimal Brl { get; set; }
     }
 }

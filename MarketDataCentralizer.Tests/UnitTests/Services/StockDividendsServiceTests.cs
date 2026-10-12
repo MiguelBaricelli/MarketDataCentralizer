@@ -25,7 +25,7 @@ namespace MarketDataCentralizer.Tests.UnitTests.Services
             var mockRepo = new Mock<IAlphaVantageRepository>();
             var mockCacheValidator = new Mock<ICacheValidator>();
 
-            mockCacheValidator.Setup(c => c.CacheValidatorWithPrefixAsync(
+            mockCacheValidator.Setup(c => c.CacheValidatorWithSymbolAsync(
                 symbol,
                 "dividends",
                 It.IsAny<Func<Task<StockDividendResponse>>>()))
@@ -50,7 +50,7 @@ namespace MarketDataCentralizer.Tests.UnitTests.Services
             var mockRepo = new Mock<IAlphaVantageRepository>();
             var mockCacheValidator = new Mock<ICacheValidator>();
 
-            mockCacheValidator.Setup(c => c.CacheValidatorWithPrefixAsync(
+            mockCacheValidator.Setup(c => c.CacheValidatorWithSymbolAsync(
                 "", "dividends", It.IsAny<Func<Task<StockDividendResponse>>>()))
                 .ReturnsAsync((StockDividendResponse)null);
 
