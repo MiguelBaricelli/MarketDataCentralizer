@@ -1,4 +1,5 @@
 ﻿using MarketDataCentralizer.Domain.Interfaces.Cripto;
+using MarketDataCentralizer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using static System.Net.WebRequestMethods;
 
@@ -18,10 +19,17 @@ namespace MarketDataCentralizer.Controllers.V1.Cripto
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(StockDividendResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCriptoDataAsync([FromQuery]List<string> symbols)
         {
             try
             {
+                if(symbols.Count == 0)
+                {
+                    return BadRequest("Não pode ser vazio");
+                }
                 var result = await _criptoService.GetCriptoDataAsync(symbols);
 
                 if (result == null)
