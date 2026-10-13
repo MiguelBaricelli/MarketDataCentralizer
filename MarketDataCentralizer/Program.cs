@@ -233,9 +233,6 @@ builder.Services.AddSwaggerGen(c =>
 
 // ================= BUILD =================
 var app = builder.Build();
-var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
-appLogger.LogInformation("Aplicação construída com sucesso. Ambiente: {Environment}",
-    app.Environment.EnvironmentName);
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
@@ -246,6 +243,10 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")
 });
+
+var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+appLogger.LogInformation("Aplicação construída com sucesso. Ambiente: {Environment}",
+    app.Environment.EnvironmentName);
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
