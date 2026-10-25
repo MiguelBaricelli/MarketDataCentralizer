@@ -1,5 +1,6 @@
 using MarketDataCentralizer.Application.Interfaces;
 using MarketDataCentralizer.Application.Services.Authorization;
+using MarketDataCentralizer.Application.Services.Cripto;
 using MarketDataCentralizer.Application.Services.Daily;
 using MarketDataCentralizer.Application.Services.DataMarketBrazil;
 using MarketDataCentralizer.Application.Services.Dividends;
@@ -8,10 +9,12 @@ using MarketDataCentralizer.Application.Services.MarketSituation;
 using MarketDataCentralizer.Application.Services.Overview;
 using MarketDataCentralizer.Application.Services.Redis;
 using MarketDataCentralizer.Application.Services.Weekly;
+using MarketDataCentralizer.Domain.Interfaces.Cripto;
 using MarketDataCentralizer.Domain.Interfaces.Infra.Repository;
 using MarketDataCentralizer.Domain.Models.ApiClientSecurity;
 using MarketDataCentralizer.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -168,6 +171,7 @@ builder.Services.AddScoped<IDataMarketBrazilService, DataMarketBrazilService>();
 builder.Services.AddScoped<RedisTestService>();
 builder.Services.AddScoped<IStockDividendsService, StockDividendsService>();
 builder.Services.AddScoped<MarketSituationService>();
+builder.Services.AddScoped<ICriptoConsumeService, CriptoConsumeService>();
 
 // ================= INFRASTRUCTURE =================
 builder.Services.AddHttpClient();
@@ -181,6 +185,8 @@ builder.Services.AddScoped<ICacheValidator>(sp =>
     return new CacheValidator(cache, cacheLogger, builder.Environment.EnvironmentName);
 });
 bootstrapLogger.LogInformation("Redis configurado com sucesso. Ambiente: {Environment}", builder.Environment.EnvironmentName);
+
+builder.Services.AddHealthChecks();
 
 
 // ================= CONTROLLERS =================
@@ -227,6 +233,17 @@ builder.Services.AddSwaggerGen(c =>
 
 // ================= BUILD =================
 var app = builder.Build();
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+
 var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
 appLogger.LogInformation("Aplicação construída com sucesso. Ambiente: {Environment}",
     app.Environment.EnvironmentName);
